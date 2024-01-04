@@ -2,6 +2,7 @@ const { response } = require("express")
 const user = require("../models/user.model")
 const bcrypt=require("bcrypt")
 const APIError = require("../utils/errors")
+const Response = require("../utils/response")
 
 
 const login=async(req,res)=>{
@@ -20,22 +21,18 @@ const register=async(req,res)=>{
     }
     req.body.password=await bcrypt.hash(req.body.password,10)
 
-    try {
         const userSave=new user(req.body)
+
         await userSave.save()
-            .then((response)=>{
-                return res.status(201).json({
-                    success:true,
-                    data:response,
-                    message:"Kayıt başarıyla eklendi"
-                })
+            .then((data)=>{
+                return new Response(data,"Kayıt başarıyla eklendi").created(res)
+              
             })
             .catch((err)=>{
+                throw new APIError("Kullanıcı Kayıt Edilemedi,400")
                 console.log(err)
             })
-    } catch (error) {
-        console.log(error)
-    }
+    
 
     console.log(req.body)
 }
