@@ -1,11 +1,13 @@
 const joi = require("joi")
 const APIError = require("../../utils/errors")
+const register  = require("../../controllers/auth.controller")
 
 class authValidation {
     constructor() { }
     static register = async (req, res, next) => {
         try {
-            await joi.object({
+            
+              await joi.object({
                 name: joi.string().trim().min(3).max(30).required().messages({
                     "string.base": "İsim Alanı Normal Metin Olmalıdır",
                     "string.empty": "İsim Alanı Boş Olamaz.",
@@ -20,7 +22,7 @@ class authValidation {
                     "string.max": "Soyisim Alanı En Fazla 30 Karakter Olmalıdır",
                     "string.required": "Soyisim Alanı Zorunludur"
                 }),
-                email: joi.email().trim().min(3).max(50).required().messages({
+                email: joi.string().email().trim().min(3).max(50).required().messages({
                     "string.base": "Email Alanı Normal Metin Olmalıdır",
                     "string.empty": "Email Alanı Boş Olamaz.",
                     "string.min": "Email Alanı En Az 3 Karakter Olmalıdır",
@@ -36,11 +38,47 @@ class authValidation {
                     "string.required": "Şifre Alanı Zorunludur"
                 })
             }).validateAsync(req.body)
-
+            
+            
+         
         } catch (error) {
+            
             if (error.details && error?.details[0].message)
                 throw new APIError(error.details[0].message, 400)
-            else throw new APIError("Lütfen Validasyon Kurallarına Uyunuz", 400)
+                     
+            else throw new APIError("Lütfen Validasyon Kurallarına Uyunuz.")
+              
+
+        }
+        next()
+    }
+    static login=async(req,res,next)=>{
+        try {
+            await joi.object({
+                email: joi.string().email().trim().min(3).max(50).required().messages({
+                    "string.base": "Email Alanı Normal Metin Olmalıdır",
+                    "string.empty": "Email Alanı Boş Olamaz.",
+                    "string.min": "Email Alanı En Az 3 Karakter Olmalıdır",
+                    "string.max": "Email Alanı En Fazla 50 Karakter Olmalıdır",
+                    "string.email": "Lütfen Geçerli Email Giriniz",
+                    "string.required": "Email Alanı Zorunludur"
+                }),
+                password: joi.string().trim().min(3).max(30).required().messages({
+                    "string.base": "Şifre Alanı Normal Metin Olmalıdır",
+                    "string.empty": "Şifre Alanı Boş Olamaz.",
+                    "string.min": "Şifre Alanı En Az 3 Karakter Olmalıdır",
+                    "string.max": "Şifre Alanı En Fazla 30 Karakter Olmalıdır",
+                    "string.required": "Şifre Alanı Zorunludur"
+                })
+            }).validateAsync(req.body)
+            
+        } catch (error) {
+            
+            if (error.details && error?.details[0].message)
+                throw new APIError(error.details[0].message, 400)
+                     
+            else throw new APIError("Lütfen Validasyon Kurallarına Uyunuz.")
+              
 
         }
         next()
