@@ -8,6 +8,7 @@ const router=require("./src/routers")
 const errorHandlerMiddleware=require("./src/middlewares/errorHandler")
 const cors=require("cors")
 const corsOptions = require("./src/helpers/corsOptions")
+const mongoSanitize = require('express-mongo-sanitize')
 
 
 
