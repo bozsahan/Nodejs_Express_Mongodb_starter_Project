@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken")
 const APIError = require("../utils/errors")
 const user = require("../models/user.model")
+require("dotenv").config()
+
 
 const createToken = async (user, res) => {
 
@@ -26,7 +28,7 @@ const tokenCheck = async (req, res, next) => {
 
     const token = req.headers.authorization.split(" ")[1]
     console.log(token)
-    await jwt.verify(token, process.env.JWT_SECRET_KEY, async(err, decoded) => {
+    await jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
         if (err)
             throw new APIError("Geçersiz Token", 401)
 
@@ -34,17 +36,63 @@ const tokenCheck = async (req, res, next) => {
 
         console.log(userInfo)
 
-        if(!userInfo)
-            throw new APIError("Geçersiz Token",401)
+        if (!userInfo)
+            throw new APIError("Geçersiz Token", 401)
 
-        req.user=userInfo
+        req.user = userInfo
         next()
     })
-    
+
 
 }
 
+const createTempraryToken = async (userId, email) => {
+    const payload = {
+        sub: userId,
+        email
+    }
+
+    const token = await jwt.sign(payload, process.env.JWT_TEMPORARY_KEY, {
+        algorithm: "HS512",
+        expiresIn: process.env.JWT_TEMPORARY_EXPIRES_IN
+    })
+
+    return "Bearer " + token
+}
+const decodedTempraryToken = async (tempraryToken) => {
+    
+    const token = tempraryToken.split(" ")[1]
+    
+
+    let userInfo
+    
+
+    await jwt.verify(token, process.env.JWT_TEMPORARY_KEY, async (err, decoded) => {
+        
+        if (err){
+            
+            throw new APIError("Geçersiz Token", 401)
+        } 
+
+
+        userInfo = await user.findById(decoded.sub).select("_id name lastname email")
+        
+
+        if (!userInfo) {
+            throw new APIError("Geçersiz Token", 401)
+        }
+        
+        
+    })
+
+    return userInfo
+
+}
+
+
 module.exports = {
     createToken,
-    tokenCheck
+    tokenCheck,
+    createTempraryToken,
+    decodedTempraryToken
 }
