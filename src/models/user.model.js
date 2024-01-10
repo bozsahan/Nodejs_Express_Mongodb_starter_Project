@@ -1,3 +1,4 @@
+const { date } = require("joi")
 const mongoose=require("mongoose")
 
 const userSchema=new mongoose.Schema({
@@ -21,6 +22,16 @@ const userSchema=new mongoose.Schema({
         type:String,
         required:true,
         trim:true
+    },
+    reset:{
+        code:{
+            type:String,
+            default:null
+        },
+        time:{
+            type:Date,
+            default:null
+        }
     }
 
 },{collection:"users"})
